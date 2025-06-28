@@ -1,0 +1,6 @@
+entities.MultiheartHelper/MultiheartModifier.placements.name.multiheartModifier=Multiheart Modifier
+entities.MultiheartHelper/NamedTheoCrystal.placements.name.theo_crystal=Named Theo Crystal
+entities.MultiheartHelper/SemipermanentCrumbleBlock.placements.name.default=Semipermanent Crumble Block (Default)
+entities.MultiheartHelper/SemipermanentCrumbleBlock.placements.name.cliffside=Semipermanent Crumble Block (Cliffside)
+entities.MultiheartHelper/MovingDustWall.placements.name.moving_dust_wall=Moving Dust Wall
+entities.MultiheartHelper/DustPolygon.placements.name.dust_polygon=Dust Polygon
