@@ -47,18 +47,7 @@ public class MultiheartHelperModule : EverestModule {
         c.Index -= 2;
         c.Emit(OpCodes.Ldloc_2);
         c.Emit(OpCodes.Ldloc, 4);
-        c.EmitDelegate<Action<AreaData, List<string>>>((data, list) => {
-            if(multiheartData.TryGetValue(data, out MultiheartMetadata meta) && SaveData.TryGetData(data.ID, out var savedData)) {
-                list.Clear();
-                foreach(var heart in meta.Hearts) {
-                    if (MTN.Journal.Has(heart.Texture))
-                    {
-                        if (savedData.unlockedHearts.Contains(heart.Name))
-                            list.Add(heart.Texture);
-                    }
-                }
-            }
-        });
+        c.EmitDelegate(addHearts);
 
         c.GotoNext(i => i.MatchLdcR4(-32));
         c.Index++;
@@ -66,6 +55,19 @@ public class MultiheartHelperModule : EverestModule {
         c.Emit(OpCodes.Ldloc, 8);
         c.EmitDelegate(AddHeartIconsHook);
 
+    }
+
+    private static void addHearts(AreaData data, List<string> list) {
+        if(multiheartData.TryGetValue(data, out MultiheartMetadata meta) && SaveData.TryGetData(data.ID, out var savedData)) {
+            list.Clear();
+            foreach(var heart in meta.Hearts) {
+                if (MTN.Journal.Has(heart.Texture))
+                {
+                    if (savedData.unlockedHearts.Contains(heart.Name))
+                        list.Add(heart.Texture);
+                }
+            }
+        }
     }
 
     private static float AddHeartIconsHook(float value, AreaData data, OuiJournalPage.Row row) {
@@ -76,7 +78,7 @@ public class MultiheartHelperModule : EverestModule {
         return meta.Spacing;
     }
 
-    private void PostAreaLoad(On.Celeste.AreaData.orig_Load orig)
+    private static void PostAreaLoad(On.Celeste.AreaData.orig_Load orig)
     {
         orig();
         foreach(var map in AreaData.Areas) {
@@ -90,6 +92,8 @@ public class MultiheartHelperModule : EverestModule {
 
 
     public override void Unload() {
+        On.Celeste.AreaData.Load -= PostAreaLoad;
+        IL.Celeste.OuiJournalProgress.ctor -= Hook_OuiJournalProgress_ctor;
         multiheartData.Clear();
         SemipermanentCrumbleBlock.Unhook();
     }
