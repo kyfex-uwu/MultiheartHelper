@@ -26,6 +26,12 @@ namespace Celeste.Mod.MultiheartHelper.Entities {
             On.Celeste.HeartGem.Awake += HeartGemAwake;
             IL.Celeste.Poem.ctor += IL_Poem_ctor;
         }
+        public static void Unhook() {
+            On.Celeste.HeartGem.Collect -= HeartGemCollectHook;
+            On.Celeste.HeartGem.RegisterAsCollected -= HeartGemRegisterCollectHook;
+            On.Celeste.HeartGem.Awake -= HeartGemAwake;
+            IL.Celeste.Poem.ctor -= IL_Poem_ctor;
+        }
 
         private static void HeartGemRegisterCollectHook(On.Celeste.HeartGem.orig_RegisterAsCollected orig, HeartGem self, Level level, string poemID)
         {
