@@ -31,9 +31,16 @@ namespace Celeste.Mod.MultiheartHelper.Entities {
 
         private static PlayerDeadBody Hook_Player_Die(On.Celeste.Player.orig_Die orig, Player self, Vector2 direction, bool evenIfInvincible, bool registerDeathInStats)
         {
-            foreach(string flag in (self.Scene as Level).Session.Flags) {
-                if(flag.StartsWith("semipermanentCrumbleBlock")) {
-                    self.SceneAs<Level>().Session.SetFlag(flag, false);
+            if (self != null)
+            {
+                if (self.Scene is not Level)
+                    return orig(self, direction, evenIfInvincible, registerDeathInStats);
+                foreach (string flag in (self.Scene as Level)?.Session?.Flags)
+                {
+                    if (flag?.StartsWith("semipermanentCrumbleBlock") == true)
+                    {
+                        self?.SceneAs<Level>()?.Session?.SetFlag(flag, false);
+                    }
                 }
             }
             return orig(self, direction, evenIfInvincible, registerDeathInStats);
