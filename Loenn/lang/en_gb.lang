@@ -4,3 +4,4 @@ entities.MultiheartHelper/SemipermanentCrumbleBlock.placements.name.default=Semi
 entities.MultiheartHelper/SemipermanentCrumbleBlock.placements.name.cliffside=Semipermanent Crumble Block (Cliffside)
 entities.MultiheartHelper/MovingDustWall.placements.name.moving_dust_wall=Moving Dust Wall
 entities.MultiheartHelper/DustPolygon.placements.name.dust_polygon=Dust Polygon
+entities.MultiheartHelper/LineMirror.placements.name.lineMirror=Line Mirror

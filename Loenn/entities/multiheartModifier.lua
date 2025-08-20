@@ -8,7 +8,8 @@ local multiheartModifier = {
             heartID = 0,
             heartName = "",
             endLevel = false,
-            heartTexture = ""
+            heartTexture = "",
+            setFlagOnCollect = ""
         }
     },
 }
