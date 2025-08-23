@@ -13,6 +13,9 @@ namespace Celeste.Mod.MultiheartHelper.Entities {
         bool endLevel { get; set; }
         string heartTexture { get; set; }
         string flag { get; set; }
+        string heartIndex { get; set; }
+        string heartSprite { get; set; }
+        Color poemColor { get; set; }
 
         static MultiheartModifier lastCollected;
 
@@ -23,6 +26,11 @@ namespace Celeste.Mod.MultiheartHelper.Entities {
             heartTexture = data.Attr("heartTexture");
             endLevel = data.Bool("endLevel");
             flag = data.Attr("setFlagOnCollect");
+            heartIndex = data.String("heartIndex");
+            heartSprite = data.String("poemHeartSprite");
+            if (heartSprite != null && !heartSprite.EndsWith("/"))
+                heartSprite += "/";
+            poemColor = data.HexColor("poemColor");
         }
 
         public static void Hook() {
@@ -42,7 +50,19 @@ namespace Celeste.Mod.MultiheartHelper.Entities {
             Level level = lastCollected.Scene as Level;
             AreaKey area = level.Session.Area;
             string poemID = AreaData.Get(level).Mode[(int)area.Mode].PoemID;
-            orig(self, Dialog.Clean("poem_" + poemID + "_" + lastCollected.heartName), heartIndex, heartAlpha);
+            orig(self, Dialog.Clean("poem_" + poemID + "_" + lastCollected.heartName), lastCollected.heartIndex == null ? heartIndex : int.Parse(lastCollected.heartIndex), heartAlpha);
+            if (lastCollected.heartSprite != null)
+            {
+                self.Heart = new Sprite(GFX.Gui, lastCollected.heartSprite);
+                self.Heart.CenterOrigin();
+                self.Heart.Justify = new Vector2(0.5f, 0.5f);
+                self.Heart.AddLoop("spin", "spin", 0.08f);
+                self.Heart.Play("spin");
+                self.Heart.Position = new Vector2(1920, 1080) * 0.5f;
+                self.Heart.Color = Color.White * heartAlpha;
+            }
+            if (lastCollected.poemColor != default)
+                self.Color = lastCollected.poemColor;
             lastCollected = null;
         }
 

@@ -9,9 +9,31 @@ local multiheartModifier = {
             heartName = "",
             endLevel = false,
             heartTexture = "",
-            setFlagOnCollect = ""
+            setFlagOnCollect = "",
+            poemHeartSprite = "",
+            poemColor = "",
+            heartIndex = ""
         }
     },
+    fieldInformation = {
+        poemColor = {
+            fieldType = "color",
+            allowEmpty = true
+        },
+        heartID = {
+            fieldType = "integer"
+        },
+        heartIndex = {
+            fieldType = "list",
+            options = {
+                "",
+                "0",
+                "1",
+                "2"
+            },
+            editable = false
+        }
+    }
 }
 
 return multiheartModifier;

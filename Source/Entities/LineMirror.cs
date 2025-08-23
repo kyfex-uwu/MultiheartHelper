@@ -122,9 +122,9 @@ namespace Celeste.Mod.MultiheartHelper
             if (flag != "" && !SceneAs<Level>().Session.GetFlag(flag))
                 return;
             if (mirrorVertical != null)
-                {
-                    Draw.SpriteBatch.Draw(mirrorVertical, Position, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.FlipVertically, 0);
-                }
+            {
+                Draw.SpriteBatch.Draw(mirrorVertical, Position, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.FlipVertically, 0);
+            }
             if (mirrorHorizontal != null)
             {
                 Draw.SpriteBatch.Draw(mirrorHorizontal, Position, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.FlipHorizontally, 0);
