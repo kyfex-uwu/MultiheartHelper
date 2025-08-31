@@ -32,11 +32,13 @@ public class MultiheartHelperModule : EverestModule {
 #endif
     }
 
-    public override void Load() {
+    public override void Load()
+    {
         On.Celeste.AreaData.Load += PostAreaLoad;
         IL.Celeste.OuiJournalProgress.ctor += Hook_OuiJournalProgress_ctor;
         MultiheartModifier.Hook();
         SemipermanentCrumbleBlock.Hook();
+        LineMirror.Hook();
     }
 
     private static void Hook_OuiJournalProgress_ctor(ILContext il)
@@ -89,8 +91,10 @@ public class MultiheartHelperModule : EverestModule {
     }
 
 
-    public override void Unload() {
+    public override void Unload()
+    {
         multiheartData.Clear();
         SemipermanentCrumbleBlock.Unhook();
+        LineMirror.Unhook();
     }
 }

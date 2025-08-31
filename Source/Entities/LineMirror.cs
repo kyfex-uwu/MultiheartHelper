@@ -2,7 +2,10 @@ using System;
 using Celeste.Mod.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil.Cil;
 using Monocle;
+using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 
 namespace Celeste.Mod.MultiheartHelper
 {
@@ -13,6 +16,7 @@ namespace Celeste.Mod.MultiheartHelper
         public string flag;
         public int w, h;
         int ID = 0;
+        static float playerYScale = 1;
         RenderTarget2D mirrorVertical, mirrorHorizontal;
         Entity reflection;
         PlayerSprite reflectionSprite;
@@ -27,9 +31,48 @@ namespace Celeste.Mod.MultiheartHelper
             right = data.Bool("horizontal");
             up = data.Bool("up");
             down = data.Bool("down");
+            left = data.Bool("left");
+            right = data.Bool("right");
             flag = data.Attr("flag");
             Depth = data.Int("depth");
             Visible = true;
+        }
+
+        public static void Hook()
+        {
+            IL.Celeste.Player.Render += Hook_Render;
+            // On.Celeste.PlayerHair.Render += CustomHairRender;
+        }
+
+        public static void Unhook()
+        {
+            IL.Celeste.Player.Render -= Hook_Render;
+            // On.Celeste.PlayerHair.Render -= CustomHairRender;
+        }
+
+        private static void CustomHairRender(On.Celeste.PlayerHair.orig_Render orig, PlayerHair self)
+        {
+            Player player = self.Scene?.Tracker?.GetEntity<Player>();
+            if (self.Entity.GetType() != typeof(Entity) || player == null)
+            {
+                orig(self);
+                return;
+            }
+
+            Entity original = self.Entity;
+            self.Entity = player;
+            orig(self);
+            self.Entity = original;
+        }
+
+        private static void Hook_Render(ILContext il)
+        {
+            ILCursor c = new(il);
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate((Player player) =>
+            {
+                playerYScale = player.Sprite.Scale.Y;
+            });
         }
 
         public override void Added(Scene scene)
@@ -97,6 +140,15 @@ namespace Celeste.Mod.MultiheartHelper
         {
             Vector2 pos = reflection.Position;
             reflection.Position = player.Position + new Vector2(0, h * (belowPlayer? 1: -1)) - Position;
+
+            if (playerYScale < 0)
+            {
+                // grelper
+                float reflectedY = Height - reflection.Position.Y;
+                reflectedY -= reflection.Height;
+                reflection.Y = reflectedY;
+            }
+
             Vector2 vector = reflection.Position - pos;
             for (int i = 0; i < reflectionHair.Nodes.Count; i++)
             {
@@ -123,11 +175,11 @@ namespace Celeste.Mod.MultiheartHelper
                 return;
             if (mirrorVertical != null)
             {
-                Draw.SpriteBatch.Draw(mirrorVertical, Position, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.FlipVertically, 0);
+                Draw.SpriteBatch.Draw(mirrorVertical, Position, null, Color.White, 0, Vector2.Zero, 1, playerYScale >= 0? SpriteEffects.FlipVertically: SpriteEffects.None, 0);
             }
             if (mirrorHorizontal != null)
             {
-                Draw.SpriteBatch.Draw(mirrorHorizontal, Position, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.FlipHorizontally, 0);
+                Draw.SpriteBatch.Draw(mirrorHorizontal, Position, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.FlipHorizontally | (playerYScale < 0? SpriteEffects.FlipVertically: SpriteEffects.None), 0);
             }
         }
     }

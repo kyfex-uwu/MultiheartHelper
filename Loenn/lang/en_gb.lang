@@ -5,3 +5,5 @@ entities.MultiheartHelper/SemipermanentCrumbleBlock.placements.name.cliffside=Se
 entities.MultiheartHelper/MovingDustWall.placements.name.moving_dust_wall=Moving Dust Wall
 entities.MultiheartHelper/DustPolygon.placements.name.dust_polygon=Dust Polygon
 entities.MultiheartHelper/LineMirror.placements.name.lineMirror=Line Mirror
+triggers.MultiheartHelper/RemoveEntities.placements.name.removeEntities=Remove Entities
+triggers.MultiheartHelper/AcceleratePlayer.placements.name.default=Accelerate Player
