@@ -102,7 +102,6 @@ namespace Celeste.Mod.MultiheartHelper.Entities {
         public override void Render()
         {
             base.Render();
-            Logger.Warn("WED", Position.ToString());
             Vector2 val = Calc.Floor(new Vector2(x, 1080 - scroll));
             foreach (CreditsNode credit in credits)
             {
