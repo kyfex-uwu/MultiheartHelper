@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Celeste.Mod.MultiheartHelper.UI.LogTypes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monocle;
@@ -24,6 +25,9 @@ namespace Celeste.Mod.MultiheartHelper.UI
             new EquipmentTab(null);
             new LogsTab(null);
             new TerminalTab(null);
+
+            new TextLog("", null);
+            new EmailLog("", null);
         }
 
         Rectangle selectionRect = new Rectangle();
@@ -236,7 +240,9 @@ namespace Celeste.Mod.MultiheartHelper.UI
             SetLocked(false);
         }
 
-        public static void DrawTextWrapped(string text, Vector2 position, float width, float scale, Color color)
+        public static void DrawTextWrapped(string text, Vector2 position, float width, float scale, Color color, Color? outlineColor = null, float outlineWidth = 0) => DrawTextWrapped(text, position, width, scale, color, out float _, outlineColor, outlineWidth);
+
+        public static void DrawTextWrapped(string text, Vector2 position, float width, float scale, Color color, out float height, Color? outlineColor = null, float outlineWidth = 0)
         {
             text = text.Replace("\\n", "\n");
             List<string> lines = [];
@@ -255,7 +261,8 @@ namespace Celeste.Mod.MultiheartHelper.UI
                 currentLine += word;
             }
             lines.Add(currentLine);
-            ActiveFont.Draw(string.Join('\n', lines), position, Vector2.Zero, Vector2.One * scale, color);
+            height = ActiveFont.HeightOf(string.Join('\n', lines)) * scale;
+            ActiveFont.DrawOutline(string.Join('\n', lines), position, Vector2.Zero, Vector2.One * scale, color, outlineWidth, outlineColor ?? Color.Transparent);
         }
 
         public static void DrawSpriteInRect(SpriteBatch spriteBatch, Texture2D texture, Rectangle rectangle, Color color)
