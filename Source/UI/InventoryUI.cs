@@ -22,11 +22,18 @@ namespace Celeste.Mod.MultiheartHelper.UI
         {
             new ItemsTab(null);
             new EquipmentTab(null);
+            new LogsTab(null);
+            new TerminalTab(null);
         }
 
-        Rectangle selectionRect = new Rectangle(0, 0, 64, 64);
+        Rectangle selectionRect = new Rectangle();
         Rectangle targetRect = new Rectangle();
         private Coroutine moveCoroutine;
+
+        RenderTarget2D screen;
+
+        static int inventoryUICount = 0;
+
         public Rectangle TargetRect
         {
             set
@@ -43,6 +50,11 @@ namespace Celeste.Mod.MultiheartHelper.UI
         }
         public float selectionWobble = 0;
         public InventoryTab currentTab => tabs[currentIndex];
+        public bool AcceptInput { get; set; } = true;
+
+        public float OpenPercentage { get; set; } = 1;
+
+
         bool tabFocused = true;
         public bool TabFocused
         {
@@ -70,11 +82,21 @@ namespace Celeste.Mod.MultiheartHelper.UI
                     continue;
                 }
             }
+
+            Tween tween = Tween.Create(Tween.TweenMode.Oneshot, Ease.SineInOut, 0.4f, true);
+            tween.OnUpdate = f =>
+            {
+                OpenPercentage = f.Eased;
+            };
+            Add(tween);
+
             Tag = Tags.PauseUpdate | Tags.HUD;
             Depth = Depths.FGTerrain - 2;
             PrimaryColor = primaryColor;
             leftArrow = GFX.Gui.textures["controls/directions/-1x0"].GetSubtextureCopy();
             rightArrow = GFX.Gui.textures["controls/directions/1x0"].GetSubtextureCopy();
+            screen = VirtualContent.CreateRenderTarget($"inventoryUI_{inventoryUICount}", Engine.Width, Engine.Height);
+            inventoryUICount++;
         }
 
         public override void Added(Scene scene)
@@ -85,6 +107,7 @@ namespace Celeste.Mod.MultiheartHelper.UI
                 tab.Setup();
             }
             currentTab?.Focus();
+            Add(new BeforeRenderHook(RenderScreen));
             SetLocked(true);
             Add(leftWiggler = Wiggler.Create(0.2f, 4f, v =>
             {
@@ -96,10 +119,20 @@ namespace Celeste.Mod.MultiheartHelper.UI
             }));
         }
 
-        public override void Render()
+        public void RenderScreen()
         {
+            Engine.Graphics.GraphicsDevice.SetRenderTarget(screen);
+            Engine.Graphics.GraphicsDevice.Clear(Color.Transparent);
+            Draw.SpriteBatch.Begin();
             RenderBackground();
             RenderForeground();
+            Draw.SpriteBatch.End();
+        }
+
+        public override void Render()
+        {
+            base.Render();
+            Draw.SpriteBatch.Draw(screen, new Vector2(0, (1-OpenPercentage) * Engine.Height/2), new Rectangle(0, (int)((1-OpenPercentage) * Engine.Height/2), Engine.Width, (int)(Engine.Height * OpenPercentage)), Color.White);
         }
 
         void RenderBackground()
@@ -109,7 +142,7 @@ namespace Celeste.Mod.MultiheartHelper.UI
 
         void RenderForeground()
         {
-            if(currentTab != null)
+            if (currentTab != null)
                 ActiveFont.DrawEdgeOutline(Dialog.Clean($"{(Scene as Level)?.Session?.Area.SID}_tab_{currentTab?.Name}"), new Vector2(Engine.Width / 2, MARGIN / 2), new Vector2(0.5f, 0.5f), Vector2.One * 1.2f, PrimaryColor, 4f, Color.Black);
             DrawSpriteCentered(Draw.SpriteBatch, leftArrow, new Rectangle(MARGIN, 0, MARGIN, MARGIN), PrimaryColor, leftScale);
             DrawSpriteCentered(Draw.SpriteBatch, rightArrow, new Rectangle(Engine.Width - 2 * MARGIN, 0, MARGIN, MARGIN), PrimaryColor, rightScale);
@@ -121,6 +154,9 @@ namespace Celeste.Mod.MultiheartHelper.UI
         public override void Update()
         {
             base.Update();
+
+            if (!AcceptInput)
+                return;
             bool? cancelDefaultDirection = TabFocused;
             int x = 0, y = 0;
             if (Input.MenuUp.Pressed)
@@ -148,13 +184,27 @@ namespace Celeste.Mod.MultiheartHelper.UI
             if (Input.ESC.Pressed)
             {
                 Input.ESC.ConsumePress();
-                RemoveSelf();
+                Close();
             }
 
             if (cancelDefaultDirection == false)
             {
                 HandleDefaultDirectionInput(x, y);
             }
+        }
+
+        public void Close()
+        {
+            Tween tween = Tween.Create(Tween.TweenMode.Oneshot, Ease.SineInOut, 0.4f, true);
+            tween.OnUpdate = f =>
+            {
+                OpenPercentage = 1-f.Eased;
+            };
+            tween.OnComplete = f =>
+            {
+                RemoveSelf();
+            };
+            Add(tween);
         }
 
         private void HandleDefaultDirectionInput(int x, int y)
