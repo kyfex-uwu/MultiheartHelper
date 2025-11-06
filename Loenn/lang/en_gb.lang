@@ -13,3 +13,5 @@ entities.MultiheartHelper/LogArea.placements.name.default=Log Area
 entities.MultiheartHelper/FlagOnItemController.placements.name.default=Flag On Item Controller
 triggers.MultiheartHelper/RemoveEntities.placements.name.removeEntities=Remove Entities
 triggers.MultiheartHelper/AcceleratePlayer.placements.name.default=Accelerate Player
+
+entities.MultiheartHelper/MultiheartModifier.attributes.description.poemColor=Vanilla values: 8cc7fa, ff668a, fffc24, ffff (blue, red, yellow, white)

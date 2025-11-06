@@ -24,7 +24,6 @@ local multiheartModifier = {
             fieldType = "integer"
         },
         heartIndex = {
-            fieldType = "list",
             options = {
                 "",
                 "0",
@@ -32,7 +31,24 @@ local multiheartModifier = {
                 "2"
             },
             editable = false
-        }
+        },
+        heartTexture = {
+            options = {
+                "heartgem0",
+                "heartgem1",
+                "heartgem2"
+            },
+            editable = true
+        },
+        poemHeartSprite = {
+            options = {
+                "collectables/heartgem/0",
+                "collectables/heartgem/1",
+                "collectables/heartgem/2",
+                "collectables/heartgem/3",
+            },
+            editable = true
+        },
     }
 }
 
