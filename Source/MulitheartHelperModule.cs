@@ -23,8 +23,10 @@ public class MultiheartHelperModule : EverestModule {
     public static MultiheartHelperModuleSaveData SaveData => (MultiheartHelperModuleSaveData) Instance._SaveData;
 
     public static Dictionary<AreaData, MultiheartMetadata> multiheartData = [];
+    public static Dictionary<string, AreaItemMetadata> itemData = [];
 
-    public MultiheartHelperModule() {
+    public MultiheartHelperModule()
+    {
         Instance = this;
 #if DEBUG
         // debug builds use verbose logging
@@ -34,17 +36,31 @@ public class MultiheartHelperModule : EverestModule {
         Logger.SetLogLevel(nameof(MultiheartHelperModule), LogLevel.Info);
 #endif
     }
-
+  
     private static ILHook hookOrigUpdateFileSelectSlot;
     public override void Load() {
         On.Celeste.AreaData.Load += PostAreaLoad;
         IL.Celeste.OuiJournalProgress.ctor += Hook_OuiJournalProgress_ctor;
+        On.Monocle.Scene.BeforeUpdate += Hook_BeforeUpdate;
+        MultiheartModifier.Hook();
+        SemipermanentCrumbleBlock.Hook();
+        LineMirror.Hook();
         hookOrigUpdateFileSelectSlot = new ILHook(typeof(OuiFileSelectSlot).GetMethod("orig_Render", BindingFlags.Public|BindingFlags.Instance), 
             Hook_OuiFileSelectSlot_origRender);
         On.Celeste.OuiFileSelectSlot.Show += Hook_OuiFileSelectSlot_Show;
         On.Celeste.OuiFileSelectSlot.ctor_int_OuiFileSelect_SaveData += Hook_OuiFileSelectSlot_Show_wrap;
-        MultiheartModifier.Hook();
-        SemipermanentCrumbleBlock.Hook();
+
+    private void Hook_BeforeUpdate(On.Monocle.Scene.orig_BeforeUpdate orig, Monocle.Scene self)
+    {
+        if (Session != null)
+        {
+            foreach (var action in Session.BeforeUpdateNextFrame)
+            {
+                action?.Invoke();
+            }
+            Session.BeforeUpdateNextFrame.Clear();
+        }
+        orig(self);
     }
 
     private static void Hook_OuiJournalProgress_ctor(ILContext il)
@@ -159,15 +175,21 @@ public class MultiheartHelperModule : EverestModule {
     private static void PostAreaLoad(On.Celeste.AreaData.orig_Load orig)
     {
         orig();
-        foreach(var map in AreaData.Areas) {
+        foreach (var map in AreaData.Areas)
+        {
             MultiheartMetadata meta;
-            if(Everest.Content.TryGet("Maps/" + map.Mode[0].Path + ".multiheart.meta", out ModAsset metaFile) && metaFile.TryDeserialize(out meta)) {
+            if (Everest.Content.TryGet("Maps/" + map.Mode[0].Path + ".multiheart.meta", out ModAsset metaFile) && metaFile.TryDeserialize(out meta))
+            {
                 multiheartData[map] = meta;
-                Logger.Warn("MultiheartHelper", meta.MaxHearts.ToString());
+            }
+
+            AreaItemMetadata itemMeta;
+            if (Everest.Content.TryGet("Maps/" + map.Mode[0].Path + ".items.meta", out ModAsset itemFile) && itemFile.TryDeserialize(out itemMeta))
+            {
+                itemData[map.Mode[0].Path] = itemMeta;
             }
         }
     }
-
 
     public override void Unload() {
         On.Celeste.AreaData.Load -= PostAreaLoad;
@@ -176,5 +198,7 @@ public class MultiheartHelperModule : EverestModule {
         multiheartData.Clear();
         MultiheartModifier.Unhook();
         SemipermanentCrumbleBlock.Unhook();
+        LineMirror.Unhook();
+
     }
 }
