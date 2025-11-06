@@ -38,6 +38,7 @@ public class MultiheartHelperModule : EverestModule {
     }
   
     private static ILHook hookOrigUpdateFileSelectSlot;
+
     public override void Load() {
         On.Celeste.AreaData.Load += PostAreaLoad;
         IL.Celeste.OuiJournalProgress.ctor += Hook_OuiJournalProgress_ctor;
@@ -45,10 +46,12 @@ public class MultiheartHelperModule : EverestModule {
         MultiheartModifier.Hook();
         SemipermanentCrumbleBlock.Hook();
         LineMirror.Hook();
-        hookOrigUpdateFileSelectSlot = new ILHook(typeof(OuiFileSelectSlot).GetMethod("orig_Render", BindingFlags.Public|BindingFlags.Instance), 
+        hookOrigUpdateFileSelectSlot = new ILHook(
+            typeof(OuiFileSelectSlot).GetMethod("orig_Render", BindingFlags.Public | BindingFlags.Instance),
             Hook_OuiFileSelectSlot_origRender);
         On.Celeste.OuiFileSelectSlot.Show += Hook_OuiFileSelectSlot_Show;
         On.Celeste.OuiFileSelectSlot.ctor_int_OuiFileSelect_SaveData += Hook_OuiFileSelectSlot_Show_wrap;
+    }
 
     private void Hook_BeforeUpdate(On.Monocle.Scene.orig_BeforeUpdate orig, Monocle.Scene self)
     {
